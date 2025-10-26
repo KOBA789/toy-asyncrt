@@ -191,16 +191,7 @@ impl Runtime {
                 let waker = task::Waker::from(task.clone());
                 let mut cx = task::Context::from_waker(&waker);
                 let mut future = task.future.lock().unwrap();
-                match future.as_mut().poll(&mut cx) {
-                    task::Poll::Pending => {
-                        drop(future);
-                        std::mem::forget(task);
-                    }
-                    task::Poll::Ready(()) => {
-                        drop(future);
-                        drop(task);
-                    }
-                }
+                let _ = future.as_mut().poll(&mut cx);
             }
 
             self.epoll.wait(&mut events)?;
